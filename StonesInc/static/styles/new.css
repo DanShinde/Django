@@ -204,3 +204,20 @@ body {
   outline: none;
   background: #243b55;
 }
+.container {
+  max-width: 800px; /* adjust this as per your requirement */
+  margin: 0 auto;
+  padding: 20px;
+}
+
+img {
+  max-width: 100%;
+}
+
+.col-md-6 {
+  float: left;
+}
+
+.btn {
+  margin-right: 10px;
+}
