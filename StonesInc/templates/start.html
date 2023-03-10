@@ -15,6 +15,7 @@
       <div class="login-box">
         <h2>Hello</h2>
         <form action="{% url 'create_folder' %}" method="post">
+          {% csrf_token %}
           <div class="user-box">
             <label for="input">You can select from existing here:</label><br>
             <div class="formbuilder-select form-group field-select-1671271428957">
@@ -26,15 +27,17 @@
               </select>
             </div>
           </div>
+          
           <div class="user-box" id="other_folder" style="display:none;">
-            <input type="text" name="folder_name" value="" placeholder="Enter the Folder Name"><br>
+            <input type="text" name="folder_name" id="folder_name" value="" placeholder="Enter the Folder Name"><br>
           </div>
-          <button class="submit-button" type="submit">
+          <button class="submit-button btn-danger" type="submit">
             <h3>Select Folder</h3>
           </button>
           <br>
         </form>
         <form action="{% url 'start_Photos' %}" method="post" align="Center">
+          {% csrf_token %}
           <h2>Selected Folder is : {{ FolderN }}</h2><br>
           <button class="submit-button" type="submit">
             <h3>Start</h3>
@@ -45,7 +48,7 @@
     </div>
   </div>
   <div class="video-feed">
-    <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3">
+    {% comment %} <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3"> {% endcomment %}
     <div class="d-grid gap-2">
       <button id="start-button" onclick="callRoute('/start_stream')">Start Stream</button>
       <button id="stop-button" onclick="callRoute('/stop_stream')">Stop Stream</button>

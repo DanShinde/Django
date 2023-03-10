@@ -7,7 +7,7 @@ from django.conf import settings
 #from .funs import StepperMotor, create_options, capture_and_save_image, save_Video
 import os
 import cv2
-from .cams import VideoCam, gen
+from .cams import *
 
 
 # initial code to for motor
@@ -33,11 +33,17 @@ img_array = []
 
 @gzip.gzip_page
 def Home(request):
-    return render(request,'start.html')
+    FolderName = request.session.get('selectedFolder')
+    options = create_options(capturedFolder)
+    if request.method == "POST":
+        # getting input with name = fname in HTML form
+        FolderName = request.POST.get("FolderName")
+        return HttpResponse("Your name is "+ FolderName)
+    return render(request,'start.html',  context = {"FolderN": FolderName, "options": options})
 
 def videofeed(request):
     try:
-        cam = VideoCam()
+        cam = VideoCam(request=request)
         return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
     except:
         pass
@@ -54,13 +60,11 @@ def videofeed(request):
 #         # getting input with name = fname in HTML form
 #         FolderName = request.POST.get("FolderName")
 #         return HttpResponse("Your name is "+ FolderName)
-#     return render(request, "start.html", {"FolderN": FolderName, "options": options})
+#     return render(request, "start.html", context = {"FolderN": FolderName, "options": options})
 
 
 def create_folder(request):
     # Get the selected option from the form
-    global selected_folder
-
     selected_option = request.POST.get('folder')
     print("New folder ", selected_option)
     # Check if the "create new folder" option was selected
@@ -68,23 +72,30 @@ def create_folder(request):
         # Get the name of the new folder from the form
         folder_name = request.POST['folder_name']
         # Get the path to the static folder
-        static_folder = settings.STATIC_ROOT
+        media_folder = settings.MEDIA_ROOT
+        print("MEDIA_ROOT:", media_folder)
         # Get the path to the subfolder within the static folder
-        subfolder_path = os.path.join(static_folder, 'StoredData')
-        # Create the new folder in the subfolder
-        new_folder_path = os.path.join(subfolder_path, folder_name)
-        os.makedirs(new_folder_path)
-        print("New folder created")
-        request.session['selectedFolder'] = folder_name
+        subfolder_path = os.path.join(media_folder, 'StoredData')
+        print("subfolder_path:", subfolder_path)
+        # Check if folder already exists
+        folder_path = os.path.join(subfolder_path, folder_name)
+        print("folder_path:", folder_path)
+        if os.path.isdir(folder_path):
+            print("Folder already exists")
+            request.session['selectedFolder'] = folder_name
+        else:
+            # Create the new folder in the subfolder
+            os.makedirs(folder_path)
+            print("New folder created")
+            request.session['selectedFolder'] = folder_name
     else:
         request.session['selectedFolder'] = selected_option
     # Redirect to the index page
     return redirect("home")
 
 
+
 def start_Photos(request):
-    global streaming
-    streaming = False
     FolderName = request.session.get('selectedFolder')
     #capture_and_save_image(FolderName)
     return redirect("home")
