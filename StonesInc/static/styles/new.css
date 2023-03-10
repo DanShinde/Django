@@ -11,15 +11,18 @@ body {
 .login-box {
   position: absolute;
   top: 50%;
-  left: 50%;
-  width: 400px;
+  right: 5%; /* adjust as needed */
   padding: 40px;
-  transform: translate(-50%, -50%);
+  transform: translateY(-50%);
   background: rgba(0, 0, 0, 0.5);
   box-sizing: border-box;
   box-shadow: 0 15px 25px rgba(0, 0, 0, 0.6);
   border-radius: 10px;
+  display: inline-block;
+  width: 45%;
+  /* Add any other styling as needed */
 }
+
 
 .login-box h2 {
   margin: 0 0 30px;
@@ -205,19 +208,27 @@ body {
   background: #243b55;
 }
 .container {
-  max-width: 800px; /* adjust this as per your requirement */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
   margin: 0 auto;
-  padding: 20px;
 }
 
-img {
-  max-width: 100%;
+
+
+.video-feed {
+  display: inline-block;
+  width: 50%;
+  /* Add any other styling as needed */
 }
 
-.col-md-6 {
-  float: left;
+.video-feed img {
+  /* Add any image styling as needed */
 }
 
-.btn {
+.video-feed button {
+  /* Add any button styling as needed */
   margin-right: 10px;
 }

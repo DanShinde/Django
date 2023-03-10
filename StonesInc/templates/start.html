@@ -6,60 +6,55 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Stones Inc.</title>
-   <link
-  rel="stylesheet"
-  type="text/css"
-  href="{% static 'styles/new.css' %}"
-/>
+   <link rel="stylesheet" href="{% static 'styles/new.css' %}">
 
 <script src="{% static 'js/starthide.js' %}"></script>
   </head>
   <body>
-
     <div class="container">
-      <div class="row">
-        <div class="col-md-6">
-          <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3">
-          <div class="d-grid gap-2">
-            <button id="start-button" onclick="callRoute('/start_stream')">Start Stream</button>
-            <button id="stop-button" onclick="callRoute('/stop_stream')">Stop Stream</button>
-            <button id="Rec-On" onclick="callRoute('/rec_on')">Start Rec</button>
-            <button id="Rec-Off" onclick="callRoute('/rec_off')">Stop Rec</button>
+      <div class="login-box">
+        <h2>Hello</h2>
+        <form action="{% url 'create_folder' %}" method="post">
+          <div class="user-box">
+            <label for="input">You can select from existing here:</label><br>
+            <div class="formbuilder-select form-group field-select-1671271428957">
+              <label for="select-1671271428957" class="formbuilder-select-label">You can select from existing here:</label><br>
+              <select class="form-control" name="folder" id="folder">
+                {% for option in options %}
+                <option>{{ option }}</option>
+                {% endfor %}
+              </select>
+            </div>
           </div>
-        </div>
+          <div class="user-box" id="other_folder" style="display:none;">
+            <input type="text" name="folder_name" value="" placeholder="Enter the Folder Name"><br>
+          </div>
+          <button class="submit-button" type="submit">
+            <h3>Select Folder</h3>
+          </button>
+          <br>
+        </form>
+        <form action="{% url 'start_Photos' %}" method="post" align="Center">
+          <h2>Selected Folder is : {{ FolderN }}</h2><br>
+          <button class="submit-button" type="submit">
+            <h3>Start</h3>
+          </button>
+        </form>
       </div>
+      <button class="submit-button" onclick="redirectToRoute('/browser')">Browse</button>   
     </div>
+  </div>
+  <div class="video-feed">
+    <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3">
+    <div class="d-grid gap-2">
+      <button id="start-button" onclick="callRoute('/start_stream')">Start Stream</button>
+      <button id="stop-button" onclick="callRoute('/stop_stream')">Stop Stream</button>
+      <button id="Rec-On" onclick="callRoute('/rec_on')">Start Rec</button>
+      <button id="Rec-Off" onclick="callRoute('/rec_off')">Stop Rec</button>
+    </div>
+  </div>
+</div>
     
-    <div class="login-box">
-      <h2>Hello</h2>
-      <form action="{% url 'create_folder' %}" method="post">
-        <div class="user-box">
-          <label for="input">You can select from existing here:</label><br>
-          <div class="formbuilder-select form-group field-select-1671271428957">
-            <label for="select-1671271428957" class="formbuilder-select-label">You can select from existing here:</label><br>
-            <select class="form-control" name="folder" id="folder">
-              {% for option in options %}
-              <option>{{ option }}</option>
-              {% endfor %}
-            </select>
-          </div>
-        </div>
-        <div class="user-box" id="other_folder" style="display:none;">
-          <input type="text" name="folder_name" value="" placeholder="Enter the Folder Name"><br>
-        </div>
-        <button class="submit-button" type="submit">
-          <h3>Select Folder</h3>
-        </button>
-        <br>
-      </form>
-      <form action="{% url 'start_Photos' %}" method="post" align="Center">
-        <h2>Selected Folder is : {{ FolderN }}</h2><br>
-        <button class="submit-button" type="submit">
-          <h3>Start</h3>
-        </button>
-      </form>
-    </div>
-    <button class="submit-button" onclick="redirectToRoute('/browser')">Browse</button>   
   </div>
   <script>
     // Create an XMLHttpRequest object
