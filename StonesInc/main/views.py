@@ -8,7 +8,7 @@ from django.conf import settings
 import os
 import cv2
 from .cams import VideoCam, gen
-
+#Hello Elad & Steve
 # initial code to for motor
 GPIO_PIN_LIST = [5, 6, 13, 19]
 #Motor = StepperMotor(GPIO_PIN_LIST)
