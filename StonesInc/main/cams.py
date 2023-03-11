@@ -8,6 +8,11 @@ import threading
 import numpy as np
 from django.conf import settings
 
+try:
+    import RPi.GPIO as GPIO
+except:
+    pass
+
 class VideoCam(object):
     def __init__(self, request):
         self.request = request
@@ -92,7 +97,6 @@ def init_gpio(pinlist):
 
 class StepperMotor(object):
     def __init__(self, gpio_pin_list):
-        import RPi.GPIO as GPIO
         """
         Initialize GPIO and Step Motor status.
 
@@ -115,7 +119,6 @@ class StepperMotor(object):
         return self.phase
 
     def rotate_segment(self, degrees):
-        import RPi.GPIO as GPIO
         """
         Perform one step.
 
@@ -136,7 +139,7 @@ class StepperMotor(object):
             GPIO.output(self.gpio_list[pin_idx], int(self.phase.astype(int)[pin_idx]))
 
     def rotate(self,  degrees=0, delay=0.002):
-        import RPi.GPIO as GPIO
+        
         """
         Perform rotation with direction and angle info.
 
