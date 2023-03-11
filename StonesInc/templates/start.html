@@ -7,6 +7,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
    <title>Stones Inc.</title>
    <link rel="stylesheet" href="{% static 'styles/new.css' %}">
+   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
 
 <script src="{% static 'js/starthide.js' %}"></script>
   </head>
@@ -36,19 +38,18 @@
           </button>
           <br>
         </form>
-        <form action="{% url 'start_Photos' %}" method="post" align="Center">
-          {% csrf_token %}
+        <div class = "container">
           <h2>Selected Folder is : {{ FolderN }}</h2><br>
-          <button class="submit-button" type="submit">
+          <button class="btn" id ="start-button">
             <h3>Start</h3>
           </button>
-        </form>
+        </div>
       </div>
       <button class="submit-button" onclick="redirectToRoute('/browser')">Browse</button>   
     </div>
   </div>
   <div class="video-feed">
-    {% comment %} <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3"> {% endcomment %}
+    <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3">
     <div class="d-grid gap-2">
       <button id="start-button" onclick="callRoute('/start_stream')">Start Stream</button>
       <button id="stop-button" onclick="callRoute('/stop_stream')">Stop Stream</button>
@@ -85,5 +86,56 @@
       }
     }
   </script>
+  <script>
+    {% comment %} document.getElementById("start-button").addEventListener("click", function() {
+      var xhr = new XMLHttpRequest();
+      xhr.open("POST", "/start-photos/", true);
+      xhr.onload = function() {
+        var response = JSON.parse(xhr.responseText);
+        if (response.success) {
+          // Handle success
+        } else {
+          // Handle error
+        }
+      };
+      xhr.send();
+    }); {% endcomment %}
+    $(document).ready(function() {
+      $('#start-button').click(function() {
+          $.ajax({
+              url: '/start_photos/',
+              type: 'POST',
+              beforeSend: function(xhr, settings) {
+                  xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+              },
+              success: function(response) {
+                  console.log('Photo captured and saved successfully');
+              },
+              error: function(xhr, status, error) {
+                  console.log('Error capturing or saving photo: ' + error);
+              }
+          });
+      });
+  });
+  
+  function getCookie(name) {
+      var cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+          var cookies = document.cookie.split(';');
+          for (var i = 0; i < cookies.length; i++) {
+              var cookie = jQuery.trim(cookies[i]);
+              if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                  break;
+              }
+          }
+      }
+      return cookieValue;
+  }
+  
+    
+
+  </script>
+  
 </body>
 </html>

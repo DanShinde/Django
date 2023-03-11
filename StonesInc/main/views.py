@@ -7,7 +7,11 @@ from django.conf import settings
 #from .funs import StepperMotor, create_options, capture_and_save_image, save_Video
 import os
 import cv2
+import json
 from .cams import *
+from django.http import JsonResponse
+import warnings
+warnings.filterwarnings("ignore", category=UserWarning, module="cv2")
 
 
 # initial code to for motor
@@ -31,6 +35,7 @@ global out
 
 img_array = []
 
+
 @gzip.gzip_page
 def Home(request):
     FolderName = request.session.get('selectedFolder')
@@ -43,24 +48,21 @@ def Home(request):
 
 def videofeed(request):
     try:
+        global cam 
         cam = VideoCam(request=request)
         return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
     except:
         pass
 
 
-
-# def home(request):
-#     global cap
-#     cap = cv2.VideoCapture(0)
-#     cap.release()
-#     FolderName = request.session.get('selectedFolder')
-#     options = create_options(capturedFolder)
-#     if request.method == "POST":
-#         # getting input with name = fname in HTML form
-#         FolderName = request.POST.get("FolderName")
-#         return HttpResponse("Your name is "+ FolderName)
-#     return render(request, "start.html", context = {"FolderN": FolderName, "options": options})
+def start_Photos(request):
+    global cam
+    try:
+        # Use the global cam object to capture and save an image
+        capture_and_save_image(request, GPIO_PIN_LIST=GPIO_PIN_LIST, cam=cam)
+        return JsonResponse({'success': True})
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)})
 
 
 def create_folder(request):
@@ -94,11 +96,6 @@ def create_folder(request):
     return redirect("home")
 
 
-
-def start_Photos(request):
-    FolderName = request.session.get('selectedFolder')
-    #capture_and_save_image(FolderName)
-    return redirect("home")
 
 
 # def browse_folder(request):
