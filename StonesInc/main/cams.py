@@ -19,6 +19,7 @@ class VideoCam(object):
         self.imagenumber = 0
         self.video = cv2.VideoCapture(0)
         self.capture_frame = False  # flag to control image capture
+        self.recording = False  # flag to control recording
         (self.grabbed, self.frame) = self.video.read()
         threading.Thread(target=self.update, args=()).start()
 
@@ -37,7 +38,7 @@ class VideoCam(object):
             self.grabbed, self.frame = self.video.read()
 
 
-def gen(camera):
+def gen(camera, imgarray):
     while True:
         image = camera.get_frame()
         _, jpeg = cv2.imencode('.jpg', image)
@@ -47,8 +48,11 @@ def gen(camera):
             image_filename = str(camera.request.session.get('selectedFolder')) + f'_{camera.imagenumber:02d}.jpg'
             cv2.imwrite(os.path.join(settings.MEDIA_ROOT, 'StoredData', camera.request.session.get('selectedFolder'), image_filename), image)
             camera.capture_frame = False
+        if camera.recording:
+            imgarray.append(frame)
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
+
 
 def capture_and_save_image(request, GPIO_PIN_LIST, cam):
     # Capture an image and get the image data as a BytesIO object
@@ -104,8 +108,10 @@ class StepperMotor(object):
         """
 
         self.gpio_list = gpio_pin_list
-        GPIO.setmode(GPIO.BCM)
-
+        try:
+            GPIO.setmode(GPIO.BCM)
+        except:
+            pass
         #init_gpio(self.gpio_list)
         self.phase = [1, 1, 0, 0]
         self.REVOLUTION_STEP_NUMBER = 2048
@@ -153,3 +159,6 @@ class StepperMotor(object):
             self.rotate_segment(degrees)
             time.sleep(delay)
         GPIO.cleanup()
+
+
+#rewrite gen function so that there will also be option for recording images to array and then convert it to videos

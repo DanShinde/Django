@@ -41,8 +41,9 @@
         <div class = "container">
           <h2>Selected Folder is : {{ FolderN }}</h2><br>
           <button class="btn" id ="start-button">
-            <h3>Start</h3>
+            <h3>Start rotating & take photos</h3>
           </button>
+          <button id="record-button">Record</button>
         </div>
       </div>
       <button class="submit-button" onclick="redirectToRoute('/browser')">Browse</button>   
@@ -133,7 +134,50 @@
       return cookieValue;
   }
   
-    
+
+$(document).ready(function() {
+  $('#record-button').click(function() {
+      $.ajax({
+          url: '/record/',
+          type: 'POST',
+          beforeSend: function(xhr, settings) {
+              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+          },
+          success: function(response) {
+              console.log('Video recorded and saved successfully');
+          },
+          error: function(xhr, status, error) {
+              console.log('Error capturing or saving video: ' + error);
+          }
+      });
+  });
+});
+
+document.getElementById("create-folder-btn").addEventListener("click", function() {
+  createFolder();
+});
+function createFolder() {
+  // Get the value of the new folder name input field
+  var folderName = document.getElementById("new-folder-name").value;
+
+  // Send an AJAX request to the server to create the new folder
+  $.ajax({
+      url: "{% url 'create_folder' %}",
+      type: "POST",
+      data: {
+          "folder_name": folderName,
+          "csrfmiddlewaretoken": "{{ csrf_token }}"
+      },
+      success: function(response) {
+          // Handle the success response
+          console.log(response);
+      },
+      error: function(xhr) {
+          // Handle the error response
+          console.log(xhr.responseText);
+      }
+  });
+}
 
   </script>
   

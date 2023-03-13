@@ -16,7 +16,7 @@ warnings.filterwarnings("ignore", category=UserWarning, module="cv2")
 
 # initial code to for motor
 GPIO_PIN_LIST = [5, 6, 13, 19]
-#Motor = StepperMotor(GPIO_PIN_LIST)
+Motor = StepperMotor(GPIO_PIN_LIST)
 # Motor.rotate(direction=True, degrees=-180)
 
 # Folder for storage
@@ -39,6 +39,8 @@ img_array = []
 @gzip.gzip_page
 def Home(request):
     FolderName = request.session.get('selectedFolder')
+    global cam 
+    cam.__del__()
     options = create_options(capturedFolder)
     if request.method == "POST":
         # getting input with name = fname in HTML form
@@ -47,10 +49,11 @@ def Home(request):
     return render(request,'start.html',  context = {"FolderN": FolderName, "options": options})
 
 def videofeed(request):
+    global img_array
     try:
         global cam 
         cam = VideoCam(request=request)
-        return StreamingHttpResponse(gen(cam), content_type="multipart/x-mixed-replace;boundary=frame")
+        return StreamingHttpResponse(gen(cam, img_array), content_type="multipart/x-mixed-replace;boundary=frame")
     except:
         pass
 
@@ -65,23 +68,74 @@ def start_Photos(request):
         return JsonResponse({'success': False, 'error': str(e)})
 
 
+def record_view(request):
+    try:
+        record(request)
+        return JsonResponse({"success": True})
+    except Exception as e:
+        return JsonResponse({"success": False, "error": str(e)})
+    
+def record():
+    global cam
+    global img_array
+    try:
+        cam.recording = True      
+        print("Recording")
+        Motor.rotate(degrees=360, delay=0.01)  
+        wait(1)
+        cam.recording = False
+
+        # Define the output video file name and codec
+        output_file = "output.avi"
+        fourcc = cv2.VideoWriter_fourcc(*"XVID")
+
+        # Set the video frame size to match the size of the input frames
+        frame_size = (640, 480)
+
+        # Create a VideoWriter object to write the frames to a video file
+        out = cv2.VideoWriter(output_file, fourcc, 30.0, frame_size)
+
+        # Iterate over each JPEG-encoded image in the list and decode it using OpenCV
+        for img_bytes in img_array:
+            nparr = np.frombuffer(img_bytes, np.uint8)
+            img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+            # Resize the image to match the output video frame size
+            img = cv2.resize(img, frame_size)
+
+            # Write the image to the video file
+            out.write(img)
+
+        # Release the VideoWriter object and close the video file
+        out.release()
+        img_array = []
+    except:
+        pass
+
 def create_folder(request):
+    response_data = {}
+
     # Get the selected option from the form
     selected_option = request.POST.get('folder')
     print("New folder ", selected_option)
+
     # Check if the "create new folder" option was selected
     if selected_option == 'Create new folder':
         # Get the name of the new folder from the form
         folder_name = request.POST['folder_name']
+
         # Get the path to the static folder
         media_folder = settings.MEDIA_ROOT
         print("MEDIA_ROOT:", media_folder)
+
         # Get the path to the subfolder within the static folder
         subfolder_path = os.path.join(media_folder, 'StoredData')
         print("subfolder_path:", subfolder_path)
+
         # Check if folder already exists
         folder_path = os.path.join(subfolder_path, folder_name)
         print("folder_path:", folder_path)
+
         if os.path.isdir(folder_path):
             print("Folder already exists")
             request.session['selectedFolder'] = folder_name
@@ -90,10 +144,15 @@ def create_folder(request):
             os.makedirs(folder_path)
             print("New folder created")
             request.session['selectedFolder'] = folder_name
+
     else:
         request.session['selectedFolder'] = selected_option
-    # Redirect to the index page
-    return redirect("home")
+
+    # Set the response data
+    response_data['selectedFolder'] = request.session['selectedFolder']
+
+    # Return a JSON response
+    return JsonResponse(response_data)
 
 
 
