@@ -40,7 +40,10 @@ img_array = []
 def Home(request):
     FolderName = request.session.get('selectedFolder')
     global cam 
-    cam.__del__()
+    try:
+        cam.__del__()
+    except:
+        print('No yet started')
     options = create_options(capturedFolder)
     if request.method == "POST":
         # getting input with name = fname in HTML form
