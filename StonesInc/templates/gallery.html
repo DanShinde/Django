@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Gallery</title>
+    <style>
+        /* Styles for the gallery */
+        .gallery {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+        .folder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 200px;
+            margin: 20px;
+        }
+        .folder img {
+            width: 100%;
+            height: auto;
+            margin-bottom: 10px;
+        }
+        .folder .name {
+            text-align: center;
+        }
+        .image {
+            display: block;
+            width: 200px;
+            height: 200px;
+            margin: 20px;
+        }
+        .image img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        .video {
+            display: block;
+            width: 200px;
+            height: 200px;
+            margin: 20px;
+            position: relative;
+        }
+        .video img {
+            width: 100%;
+            height: auto;
+            object-fit: cover;
+        }
+        .video .play-button {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: rgba(0, 0, 0, 0.5);
+            cursor: pointer;
+        }
+        .video .play-button:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            border-style: solid;
+            border-width: 0 0 15px 25px;
+            border-color: transparent transparent transparent rgba(255, 255, 255, 1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Gallery</h1>
+    <div class="gallery">
+        {% for folder in folders %}
+            <div class="folder">
+                <a href="{{ folder.name }}">
+                    <img src="{{ folder.items.0.thumbnail }}" alt="{{ folder.name }}">
+                    <div class="name">{{ folder.name }}</div>
+                </a>
+            </div>
+        {% endfor %}
+        {% for folder in folders %}
+            {% for item in folder.items %}
+                {% if item.type == 'image' %}
+                    <a href="{{ folder.name }}/{{ item.name }}" class="image">
+                        <img src="{{ folder.name }}/{{ item.thumbnail }}" alt="{{ item.name }}">
+                    </a>
+                {% elif item.type == 'video' %}
+                    <a href="{{ folder.name }}/{{ item.name }}" class="video">
+                        <img src="{{ folder.name }}/{{ item.thumbnail }}" alt="{{ item.name }}">
+                        <div class="play-button"></div>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        {% endfor %}
+    </div>
+
+    <script>
+        // Add click handlers to the video play buttons
+var playButtons = document.querySelectorAll('.play-button');
+playButtons.forEach(function(button) {
+    button.addEventListener('click', function(event) {
+        event.preventDefault();
+        var videoUrl = this.parentElement.getAttribute('href');
+        var videoHtml = '<video controls autoplay>' +
+            '<source src="' + videoUrl + '" type="video/mp4">' +
+            'Your browser does not support the video tag.' +
+            '</video>';
+        var modal = document.createElement('div');
+        modal.classList.add('modal');
+        modal.innerHTML = videoHtml;
+        document.body.appendChild(modal);
+        modal.addEventListener('click', function(event) {
+            event.preventDefault();
+            this.remove();
+        });
+    });
+});
+</script>

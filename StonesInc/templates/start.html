@@ -1,185 +1,153 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    {% load static %}
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Stones Inc.</title>
-   <link rel="stylesheet" href="{% static 'styles/new.css' %}">
-   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+{% extends 'base.html' %}
+{% load static %}
+{% block styles %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}">
 
+{% endblock %}
+{% block title %} Login {% endblock %}
+{% load crispy_forms_tags %}
 
-<script src="{% static 'js/starthide.js' %}"></script>
-  </head>
-  <body>
-    <div class="container">
-      <div class="login-box">
-        <h2>Hello</h2>
-        <form action="{% url 'create_folder' %}" method="post">
-          {% csrf_token %}
-          <div class="user-box">
-            <label for="input">You can select from existing here:</label><br>
-            <div class="formbuilder-select form-group field-select-1671271428957">
-              <label for="select-1671271428957" class="formbuilder-select-label">You can select from existing here:</label><br>
-              <select class="form-control" name="folder" id="folder">
-                {% for option in options %}
-                <option>{{ option }}</option>
-                {% endfor %}
-              </select>
-            </div>
+{% block content %}
+<section class="vh-100">
+    <div class="container-fluid h-custom">
+      <div class="row d-flex justify-content-center align-items-center h-100">
+        <div class="col-md-9 col-lg-6 col-xl-5">
+          
+          <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3">
+         <!-- <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+          class="img-fluid" alt="Sample image">-->
+          
+        </div>
+        <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+          <div class="container">
+            <form method= "POST">
+              <div class="form-group">
+                <label for="select-folder">Select Folder:</label>
+                  <select class="form-control" name="folder" id="folder">
+                    {% for option in options %}
+                    <option>{{ option }}</option>
+                    {% endfor %}
+                  </select>
+              </div>
+              <div id="new-folder" class="form-group d-none">
+                <label for="new-folder-name">New Folder Name:</label>
+                <input type="text" class="form-control" id="new-folder-name" name="new-folder-name">
+              </div>
+              <div class="form-group">
+                <label for="selected-folder-tag">Selected Folder:</label>
+                <span id="selected-folder-tag"></span>
+              </div>
+              <button type="button" class="btn btn-primary" id = "btn-create-folder">Create Folder</button>
+              <button id="start-button" type="button" class="btn btn-success">Start</button>
+              <button type="button" class="btn btn-info">
+                <a href = {% url 'gallery' %} >Go to Gallery</a></button>
+            </form>
           </div>
           
-          <div class="user-box" id="other_folder" style="display:none;">
-            <input type="text" name="folder_name" id="folder_name" value="" placeholder="Enter the Folder Name"><br>
-          </div>
-          <button class="submit-button btn-danger" type="submit">
-            <h3>Select Folder</h3>
-          </button>
-          <br>
-        </form>
-        <div class = "container">
-          <h2>Selected Folder is : {{ FolderN }}</h2><br>
-          <button class="btn" id ="start-button">
-            <h3>Start rotating & take photos</h3>
-          </button>
-          <button id="record-button">Record</button>
-        </div>
-      </div>
-      <button class="submit-button" onclick="redirectToRoute('/browser')">Browse</button>   
-    </div>
-  </div>
-  <div class="video-feed">
-    <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3">
-    <div class="d-grid gap-2">
-      <button id="start-button" onclick="callRoute('/start_stream')">Start Stream</button>
-      <button id="stop-button" onclick="callRoute('/stop_stream')">Stop Stream</button>
-      <button id="Rec-On" onclick="callRoute('/rec_on')">Start Rec</button>
-      <button id="Rec-Off" onclick="callRoute('/rec_off')">Stop Rec</button>
-    </div>
-  </div>
 </div>
-    
-  </div>
-  <script>
-    // Create an XMLHttpRequest object
-    const xhr = new XMLHttpRequest();
+</div>
+</div>
+</section>
 
-    // Function to start the stream
-    function callRoute(Route) {
-      // Send a request to the server to start the stream
-      xhr.open("POST", Route, true);
-      xhr.send();
-      console.log("Success")
-    }
+<script>
+  window.addEventListener('load', 
+  function() { 
 
-    function redirectToRoute(route) {
-      window.location.href = route;
-    }
-
-    var select = document.getElementById("folder");
-    var input = document.getElementById("other_folder");
-    select.onchange = function(){
-      if (select.value === "Create new folder") {
-        input.style.display = "block";
-      } else {
-        input.style.display = "none";
-      }
-    }
-  </script>
-  <script>
-    {% comment %} document.getElementById("start-button").addEventListener("click", function() {
-      var xhr = new XMLHttpRequest();
-      xhr.open("POST", "/start-photos/", true);
-      xhr.onload = function() {
-        var response = JSON.parse(xhr.responseText);
-        if (response.success) {
-          // Handle success
-        } else {
-          // Handle error
-        }
-      };
-      xhr.send();
-    }); {% endcomment %}
-    $(document).ready(function() {
-      $('#start-button').click(function() {
-          $.ajax({
-              url: '/start_photos/',
-              type: 'POST',
-              beforeSend: function(xhr, settings) {
-                  xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-              },
-              success: function(response) {
-                  console.log('Photo captured and saved successfully');
-              },
-              error: function(xhr, status, error) {
-                  console.log('Error capturing or saving photo: ' + error);
-              }
-          });
-      });
-  });
   
-  function getCookie(name) {
-      var cookieValue = null;
-      if (document.cookie && document.cookie !== '') {
-          var cookies = document.cookie.split(';');
-          for (var i = 0; i < cookies.length; i++) {
-              var cookie = jQuery.trim(cookies[i]);
-              if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                  cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                  break;
-              }
-          }
-      }
-      return cookieValue;
+const folderSelect = document.getElementById('folder');
+const newFolderDiv = document.getElementById('new-folder');
+const newFolderInput = document.getElementById('new-folder-name');
+const createFolderButton = document.getElementById("btn-create-folder");
+const selectedFolderDeclare = document.getElementById('selected-folder-tag'); 
+
+function handleFolderSelectChange() {
+  if (folderSelect.value === 'Create new folder') {
+    newFolderDiv.classList.remove('d-none');
+    createFolderButton.classList.remove('d-none');
+  } else {
+    newFolderDiv.classList.add('d-none');
+    createFolderButton.classList.add('d-none');
+    selectedFolderDeclare.textContent  = folderSelect.value;
   }
-  
-
-$(document).ready(function() {
-  $('#record-button').click(function() {
-      $.ajax({
-          url: '/record/',
-          type: 'POST',
-          beforeSend: function(xhr, settings) {
-              xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
-          },
-          success: function(response) {
-              console.log('Video recorded and saved successfully');
-          },
-          error: function(xhr, status, error) {
-              console.log('Error capturing or saving video: ' + error);
-          }
-      });
-  });
-});
-
-document.getElementById("create-folder-btn").addEventListener("click", function() {
-  createFolder();
-});
-function createFolder() {
-  // Get the value of the new folder name input field
-  var folderName = document.getElementById("new-folder-name").value;
-
-  // Send an AJAX request to the server to create the new folder
-  $.ajax({
-      url: "{% url 'create_folder' %}",
-      type: "POST",
-      data: {
-          "folder_name": folderName,
-          "csrfmiddlewaretoken": "{{ csrf_token }}"
-      },
-      success: function(response) {
-          // Handle the success response
-          console.log(response);
-      },
-      error: function(xhr) {
-          // Handle the error response
-          console.log(xhr.responseText);
-      }
-  });
 }
 
-  </script>
-  
-</body>
-</html>
+// Call the function when the page loads
+handleFolderSelectChange();
+
+// Attach the function to the change event of the folder select element
+folderSelect.addEventListener('change', handleFolderSelectChange);
+
+
+
+// Attach an event listener to the create folder button
+createFolderButton.addEventListener('click', (event) => {
+  event.preventDefault(); // prevent the form from submitting
+  selection = folderSelect.value
+  // Get the value of the new folder input
+  const newFolderName = newFolderInput.value;
+  var csrftoken = getCookie('csrftoken');
+  // Send an AJAX request to the server
+  fetch('/create_folder/', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': csrftoken,
+    },
+    body: JSON.stringify({
+      folderName: newFolderName,
+      selection: selection,
+    }),
+  })
+    .then((response) => response.json())
+    .then((data) => {
+      // If the request was successful, update the folder select and selected folder tag
+      if (data.success) {
+        // Create a new option element and add it to the folder select
+        const optionElement = document.createElement('option');
+        optionElement.textContent = newFolderName;
+        folderSelect.appendChild(optionElement);
+
+       // const selectedFolderDeclare = document.getElementById('selected-folder-tag'); 
+
+        // Set the selected folder tag text to the new folder name
+        selectedFolderDeclare.textContent = newFolderName;
+
+        // Reset the new folder input value and hide the new folder div
+        newFolderInput.value = '';
+        newFolderDiv.classList.add('d-none');
+        createFolderButton.classList.add('d-none');
+        console.log('Folder Created', newFolderName)
+      }
+    })
+    .catch((error) => {
+      console.error(error);
+    });
+}); 
+
+
+//Start Photos script
+const startButton = document.getElementById('start-button');
+
+startButton.addEventListener('click', (event) => {
+  // This code will run when the button is clicked
+fetch('/start_photos/')
+  .then(response => response.json())
+  .then(data => {
+    // This code will run when the server responds with data
+    console.log(data);
+  })
+  .catch(error => {
+    // This code will run if there is an error sending or receiving the request
+    console.error(error);
+  });
+
+});
+
+
+});// On load closing brackets
+
+
+
+</script>
+{% endblock %}
+

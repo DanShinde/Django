@@ -81,7 +81,9 @@ def create_options(folder_path):
     # Filter the list to only include directories
     options = [item for item in items if os.path.isdir(os.path.join(subfolder_path, item))]
     # Add the "create new folder" option to the list
+    
     options.insert(0,'Create new folder')
+    options = reversed(options)
     # Return the list of directories
     return options
 

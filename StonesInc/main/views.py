@@ -24,7 +24,7 @@ IMG_FOLDER = os.path.join('static', 'IMG')
 capturedFolder = os.path.join(settings.MEDIA_ROOT, 'StoredData')
 CurrentDir = capturedFolder
 index = 0
-currentFile = 'snap' + str(index) + '.jpeg'
+currentFile = f'snap{index}.jpeg'
 
 selected_folder = ""
 streaming = True
@@ -36,20 +36,40 @@ global out
 img_array = []
 
 
+def at_home(request):
+    options = create_options(capturedFolder)
+
+
+
+
 @gzip.gzip_page
 def Home(request):
     FolderName = request.session.get('selectedFolder')
-    global cam 
+    global cam
     try:
         cam.__del__()
-    except:
+    except Exception:
         print('No yet started')
     options = create_options(capturedFolder)
     if request.method == "POST":
         # getting input with name = fname in HTML form
         FolderName = request.POST.get("FolderName")
-        return HttpResponse("Your name is "+ FolderName)
+        return HttpResponse(f"Your name is {FolderName}")
+
     return render(request,'start.html',  context = {"FolderN": FolderName, "options": options})
+
+
+def selectfolder(request):
+    selection= request.args.get('folder')
+    if selection == 'Create new folder':
+        return render(request, 'select.html')
+    else:
+        request.session['selectedFolder'] = selection
+        return HttpResponse('Selected folder is {selection}.')
+
+
+
+
 
 def videofeed(request):
     global img_array
@@ -117,15 +137,19 @@ def record():
 
 def create_folder(request):
     response_data = {}
-
+    # Parse the request body as JSON
+    request_data = json.loads(request.body)
+    
+    # Extract the folder name and selection data from the JSON data
+    
     # Get the selected option from the form
-    selected_option = request.POST.get('folder')
-    print("New folder ", selected_option)
+    selected_option = request_data.get('selection')
+    print("New folder -", selected_option)
 
     # Check if the "create new folder" option was selected
     if selected_option == 'Create new folder':
         # Get the name of the new folder from the form
-        folder_name = request.POST['folder_name']
+        folder_name = request_data.get('folderName')
 
         # Get the path to the static folder
         media_folder = settings.MEDIA_ROOT
@@ -137,19 +161,22 @@ def create_folder(request):
 
         # Check if folder already exists
         folder_path = os.path.join(subfolder_path, folder_name)
-        print("folder_path:", folder_path)
+        print("Created folder_path:", folder_path)
 
         if os.path.isdir(folder_path):
             print("Folder already exists")
             request.session['selectedFolder'] = folder_name
+            response_data['success'] = False
         else:
             # Create the new folder in the subfolder
             os.makedirs(folder_path)
             print("New folder created")
             request.session['selectedFolder'] = folder_name
+            response_data['success'] = True
 
     else:
         request.session['selectedFolder'] = selected_option
+        response_data['success'] = True
 
     # Set the response data
     response_data['selectedFolder'] = request.session['selectedFolder']
