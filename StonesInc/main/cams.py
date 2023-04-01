@@ -4,13 +4,13 @@ import os
 import time
 import cv2
 import threading
-
+from gallery.models import Image
 import numpy as np
 from django.conf import settings
 
 try:
     import RPi.GPIO as GPIO
-except:
+except Exception:
     pass
 
 class VideoCam(object):
@@ -18,6 +18,7 @@ class VideoCam(object):
         self.request = request
         self.imagenumber = 0
         self.video = cv2.VideoCapture(0)
+        self.folder_name = None
         self.capture_frame = False  # flag to control image capture
         self.recording = False  # flag to control recording
         (self.grabbed, self.frame) = self.video.read()
@@ -45,8 +46,8 @@ def gen(camera, imgarray):
         frame = jpeg.tobytes()
         if camera.capture_frame:
         # Save the image
-            image_filename = str(camera.request.session.get('selectedFolder')) + f'_{camera.imagenumber:02d}.jpg'
-            cv2.imwrite(os.path.join(settings.MEDIA_ROOT, 'StoredData', camera.request.session.get('selectedFolder'), image_filename), image)
+            image_filename = f'{str(camera.folder_name)}_{camera.imagenumber:02d}.jpg'
+            cv2.imwrite(os.path.join(settings.MEDIA_ROOT, 'StoredData', camera.folder_name, image_filename), image)
             camera.capture_frame = False
         if camera.recording:
             imgarray.append(frame)
@@ -56,18 +57,20 @@ def gen(camera, imgarray):
 
 def capture_and_save_image(request, GPIO_PIN_LIST, cam):
     # Capture an image and get the image data as a BytesIO object
-    try :
+    cam.folder_name = request.session.get('selectedFolder')
+    try:
         motor = StepperMotor(GPIO_PIN_LIST)
-    except:
+    except Exception:
         print("No motor hardware")
     for i in range(1, 13):
         while cam.capture_frame:
             pass  # wait until capture_frame is False
         cam.imagenumber= i
         cam.capture_frame = True
+        time.sleep(0.5)
         try:
             motor.rotate(degrees=30)
-        except:
+        except Exception:
             print("No motor hardware")
 
 
@@ -133,16 +136,8 @@ class StepperMotor(object):
         :param direction: (Boolean) Clockwise = True | Inverted = False
         :return: None
         """
-        if degrees >0:
-            direction = False
-        else:
-            direction = True
-        
-        if direction:
-            self.phase = np.roll(self.phase, 1)
-        else:
-            self.phase = np.roll(self.phase, -1)
-
+        direction = degrees <= 0
+        self.phase = np.roll(self.phase, 1) if direction else np.roll(self.phase, -1)
         for pin_idx in range(len(self.gpio_list)):
             GPIO.output(self.gpio_list[pin_idx], int(self.phase.astype(int)[pin_idx]))
 

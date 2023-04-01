@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex align-items-center justify-content-center">
+<h1 justify-content-center>Directories</h1>
+<ul class="list-group-item list-group-item-action">
+{% for folder in folders %}
+    <li class="list-group-item list-group-item-action list-group-item-info align-content-center">
+        <a href="{% url 'folder_detail' folder %}">{{ folder }}</a>
+    </li>
+{% endfor %}
+</ul>
+</div>
+{% endblock %}

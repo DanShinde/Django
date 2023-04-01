@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}">
 
 {% endblock %}
-{% block title %} Login {% endblock %}
+{% block title %} Hello {% endblock %}
 {% load crispy_forms_tags %}
 
 {% block content %}
@@ -34,13 +34,13 @@
                 <input type="text" class="form-control" id="new-folder-name" name="new-folder-name">
               </div>
               <div class="form-group">
-                <label for="selected-folder-tag">Selected Folder:</label>
                 <span id="selected-folder-tag"></span>
               </div>
               <button type="button" class="btn btn-primary" id = "btn-create-folder">Create Folder</button>
               <button id="start-button" type="button" class="btn btn-success">Start</button>
+              <button id="reset-button" type="button" class="btn btn-warning">Reset</button>
               <button type="button" class="btn btn-info">
-                <a href = {% url 'gallery' %} >Go to Gallery</a></button>
+                <a href = {% url 'redirect_to_Gallery' %} >Go to Gallery</a></button>
             </form>
           </div>
           
@@ -52,13 +52,14 @@
 <script>
   window.addEventListener('load', 
   function() { 
-
+    
   
 const folderSelect = document.getElementById('folder');
 const newFolderDiv = document.getElementById('new-folder');
 const newFolderInput = document.getElementById('new-folder-name');
 const createFolderButton = document.getElementById("btn-create-folder");
 const selectedFolderDeclare = document.getElementById('selected-folder-tag'); 
+
 
 function handleFolderSelectChange() {
   if (folderSelect.value === 'Create new folder') {
@@ -67,12 +68,22 @@ function handleFolderSelectChange() {
   } else {
     newFolderDiv.classList.add('d-none');
     createFolderButton.classList.add('d-none');
-    selectedFolderDeclare.textContent  = folderSelect.value;
+    console.log(folderSelect.value)
+    // Send a GET request to the server to select the folder
+    fetch(`/selectfolder/${folderSelect.value}`)
+      .then(response => response.text())
+      .then(message => {
+        selectedFolderDeclare.textContent = message;
+      });
   }
 }
 
+//Hide create folder button initially
+createFolderButton.classList.add('d-none');
+
 // Call the function when the page loads
-handleFolderSelectChange();
+handleFolderSelectChange() 
+
 
 // Attach the function to the change event of the folder select element
 folderSelect.addEventListener('change', handleFolderSelectChange);

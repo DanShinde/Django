@@ -14,6 +14,7 @@ import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="cv2")
 
 
+
 # initial code to for motor
 GPIO_PIN_LIST = [5, 6, 13, 19]
 Motor = StepperMotor(GPIO_PIN_LIST)
@@ -59,14 +60,13 @@ def Home(request):
     return render(request,'start.html',  context = {"FolderN": FolderName, "options": options})
 
 
-def selectfolder(request):
-    selection= request.args.get('folder')
-    if selection == 'Create new folder':
+def selectfolder(request, folder):
+    #selection = request.GET.get('folder')
+    if folder == 'Create new folder':
         return render(request, 'select.html')
     else:
-        request.session['selectedFolder'] = selection
-        return HttpResponse('Selected folder is {selection}.')
-
+        request.session['selectedFolder'] = folder
+        return HttpResponse(f'Selected folder is {folder}.')
 
 
 
@@ -185,6 +185,16 @@ def create_folder(request):
     return JsonResponse(response_data)
 
 
+
+def stop_cam():
+    global cam
+    if cam:
+        cam.video.release()
+        cam = None
+
+def redirect_to_Gallery(request):
+    stop_cam()
+    return redirect('folder_list')
 
 
 # def browse_folder(request):

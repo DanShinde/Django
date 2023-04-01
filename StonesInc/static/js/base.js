@@ -16,3 +16,13 @@ function getCookie(name) {
 }
 
 
+// function handleFolderSelectChange() {
+//     if (folderSelect.value === 'Create new folder') {
+//       newFolderDiv.classList.remove('d-none');
+//       createFolderButton.classList.remove('d-none');
+//     } else {
+//       newFolderDiv.classList.add('d-none');
+//       createFolderButton.classList.add('d-none');
+//       selectedFolderDeclare.textContent  = folderSelect.value;
+//     }
+//   }
