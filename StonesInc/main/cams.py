@@ -4,7 +4,6 @@ import os
 import time
 import cv2
 import threading
-from gallery.models import Image
 import numpy as np
 from django.conf import settings
 
