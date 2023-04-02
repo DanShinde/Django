@@ -23,5 +23,6 @@ def folder_detail(request, folder_name):
         if ext == '.jpg':
             jpg_files.append(os.path.join('\\media\\StoredData', folder_name, filename))
         elif ext == '.mp4':
-            mp4_files.append(os.path.join('/StoredData', folder_name, filename))
+            mp4_files.append(os.path.join('\\media\\StoredData', folder_name, filename))
+    print(mp4_files)
     return render(request, 'gallery/folder_detail.html', {'folder_name': folder_name, 'jpg_files': jpg_files, 'mp4_files': mp4_files})

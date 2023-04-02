@@ -20,6 +20,7 @@ class VideoCam(object):
         self.folder_name = None
         self.capture_frame = False  # flag to control image capture
         self.recording = False  # flag to control recording
+        self.frames = []
         (self.grabbed, self.frame) = self.video.read()
         threading.Thread(target=self.update, args=()).start()
 
@@ -50,6 +51,7 @@ def gen(camera, imgarray):
             camera.capture_frame = False
         if camera.recording:
             imgarray.append(frame)
+            camera.frames = imgarray
         yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n\r\n')
 
@@ -141,7 +143,7 @@ class StepperMotor(object):
             GPIO.output(self.gpio_list[pin_idx], int(self.phase.astype(int)[pin_idx]))
 
     def rotate(self,  degrees=0, delay=0.002):
-        
+
         """
         Perform rotation with direction and angle info.
 
@@ -151,7 +153,7 @@ class StepperMotor(object):
         """
         init_gpio(self.gpio_list)
         step_number = int(self.REVOLUTION_STEP_NUMBER * abs(degrees)/ 360)
-        for i in range(0, step_number):
+        for _ in range(step_number):
             self.rotate_segment(degrees)
             time.sleep(delay)
         GPIO.cleanup()

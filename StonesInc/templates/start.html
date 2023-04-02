@@ -4,7 +4,7 @@
 <link rel="stylesheet" type="text/css" href="{% static 'css/auth.css' %}">
 
 {% endblock %}
-{% block title %} Login {% endblock %}
+{% block title %} Home {% endblock %}
 {% load crispy_forms_tags %}
 
 {% block content %}
@@ -38,9 +38,10 @@
               </div>
               <button type="button" class="btn btn-primary" id = "btn-create-folder">Create Folder</button>
               <button id="start-button" type="button" class="btn btn-success">Start</button>
+              <button id="record-button" type="button" class="btn btn-success">Record</button>
               <button id="reset-button" type="button" class="btn btn-warning">Reset</button>
               <button type="button" class="btn btn-info">
-                <a href = {% url 'redirect_to_Gallery' %} >Go to Gallery</a></button>
+              <a href = {% url 'redirect_to_Gallery' %} >Go to Gallery</a></button>
             </form>
           </div>
           
@@ -153,6 +154,27 @@ fetch('/start_photos/')
   });
 
 });
+
+//Start Photos script
+const recordButton = document.getElementById('record-button');
+
+recordButton.addEventListener('click', (event) => {
+  // This code will run when the button is clicked
+fetch('/record/')
+  .then(response => response.json())
+  .then(data => {
+    // This code will run when the server responds with data
+    console.log(data);
+  })
+  .catch(error => {
+    // This code will run if there is an error sending or receiving the request
+    console.error(error);
+  });
+
+});
+
+
+
 
 
 });// On load closing brackets

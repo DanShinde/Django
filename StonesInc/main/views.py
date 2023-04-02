@@ -93,33 +93,42 @@ def start_Photos(request):
 
 def record_view(request):
     try:
-        record(request)
+        folder = request.session.get('selectedFolder')
+        record(folder)
         return JsonResponse({"success": True})
     except Exception as e:
         return JsonResponse({"success": False, "error": str(e)})
     
-def record():
+def record(folder):
     global cam
     global img_array
     try:
         cam.recording = True      
-        print("Recording")
-        Motor.rotate(degrees=360, delay=0.01)  
-        wait(1)
+        img_array = []
+        print("Recording Started")
+        try:
+            Motor.rotate(degrees=360, delay=0.01)  
+        except Exception:
+            print("No motor hardware connected")
+        sleep(3)
+        print("Recording Stopped")
         cam.recording = False
-
+        
         # Define the output video file name and codec
-        output_file = "output.avi"
-        fourcc = cv2.VideoWriter_fourcc(*"XVID")
+        output_file = "Video.mp4"
+        # Define the output file path
+        output_path = os.path.join(settings.MEDIA_ROOT, 'StoredData',folder, output_file)
+
+        fourcc = cv2.VideoWriter_fourcc(*"mp4v") #*"XVID")
 
         # Set the video frame size to match the size of the input frames
         frame_size = (640, 480)
 
         # Create a VideoWriter object to write the frames to a video file
-        out = cv2.VideoWriter(output_file, fourcc, 30.0, frame_size)
-
+        out = cv2.VideoWriter(output_path, fourcc, 30.0, frame_size)
+        print(f"Length of image array is {len(cam.frames)}")
         # Iterate over each JPEG-encoded image in the list and decode it using OpenCV
-        for img_bytes in img_array:
+        for img_bytes in cam.frames:
             nparr = np.frombuffer(img_bytes, np.uint8)
             img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
 
@@ -132,6 +141,7 @@ def record():
         # Release the VideoWriter object and close the video file
         out.release()
         img_array = []
+        print('Recording complete')
     except:
         pass
 

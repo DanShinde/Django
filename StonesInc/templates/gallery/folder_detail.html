@@ -16,12 +16,31 @@
         <img src="{{ file }}">
     </div>
     {% endfor %}
-    {% for file in mp4_files %}
-        <li><video src="{{ MEDIA_URL }}/StoredData/{{ folder_name }}/{{ file.url  }}" controls></video></li>
-    {% endfor %}
- 
+
 {% else %}
-    <p>No files found.</p>
+    <p>No Photos found.</p>
 {% endif %}
+{% if mp4_files%}
+  
+    {% for file in mp4_files %}
+    <div class="item item-{{forloop.counter}}">
+        <video
+    id="my-video"
+    class="video-js"
+    controls
+    preload="auto"
+    width="640"
+    height="264"
+    poster=""
+    data-setup="{}"
+  >
+    <source src="{{ file }}" type="video/mp4" />
+  </video>
+    </div>
+    {% endfor %}
+{% else %}
+    <p>No Videos found.</p>
+{% endif %}
+
 </div>
 {% endblock %}
