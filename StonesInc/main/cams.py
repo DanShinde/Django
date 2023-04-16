@@ -21,6 +21,8 @@ class VideoCam(object):
         self.capture_frame = False  # flag to control image capture
         self.recording = False  # flag to control recording
         self.frames = []
+        self.zoom_factor = 1.0
+        self.view_factor = 1.0
         (self.grabbed, self.frame) = self.video.read()
         threading.Thread(target=self.update, args=()).start()
 
@@ -42,6 +44,19 @@ class VideoCam(object):
 def gen(camera, imgarray):
     while True:
         image = camera.get_frame()
+        h, w = image.shape[:2]
+        zoom_factor = camera.zoom_factor
+        if zoom_factor > 1.0:
+            new_h, new_w = int(h / zoom_factor), int(w / zoom_factor)
+            # Calculate the center of the image
+            center_h, center_w = int(h / 2), int(w / 2)
+            # Calculate the top left and bottom right coordinates of the crop
+            tl_h, tl_w = center_h - int(new_h / 2), center_w - int(new_w / 2)
+            br_h, br_w = tl_h + new_h, tl_w + new_w
+            # Crop the image
+            image = image[tl_h:br_h, tl_w:br_w]
+        new_h, new_w = int(h * camera.view_factor), int(w * camera.view_factor)
+        image = cv2.resize(image, (new_w, new_h))
         _, jpeg = cv2.imencode('.jpg', image)
         frame = jpeg.tobytes()
         if camera.capture_frame:

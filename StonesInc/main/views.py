@@ -207,6 +207,22 @@ def redirect_to_Gallery(request):
     return redirect('folder_list')
 
 
+def update_zoom_factor(request):
+    if request.method == 'POST':
+        zoom_factor = request.POST.get('zoom_factor')
+        view_factor = request.POST.get('view_factor')
+        if zoom_factor:
+            try:
+                cam.zoom_factor = float(zoom_factor)
+            except ValueError:
+                pass
+        if view_factor:
+            try:
+                cam.view_factor = float(view_factor)
+            except ValueError:
+                pass
+    return HttpResponse()
+
 # def browse_folder(request):
 #     folder = 'static/StoredData'
 #     files = os.listdir(folder)

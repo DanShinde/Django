@@ -6,16 +6,23 @@
 {% endblock %}
 {% block title %} Home {% endblock %}
 {% load crispy_forms_tags %}
-
+   <!-- <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
+          class="img-fluid" alt="Sample image">-->
 {% block content %}
 <section class="vh-100">
     <div class="container-fluid h-custom">
       <div class="row d-flex justify-content-center align-items-center h-100">
         <div class="col-md-9 col-lg-6 col-xl-5">
           
-          <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3">
-         <!-- <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/draw2.webp"
-          class="img-fluid" alt="Sample image">-->
+          {% comment %} <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3"> {% endcomment %}
+          <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3" id="my-image">
+          <div class="form-group">
+            <label for="zoom-slider">Zoom:</label>
+            <input type="range" class="form-control-range" id="zoom-slider" name="zoom" min="0.5" max="2.0" step="0.1" value="1.0">
+            <label for="view-slider">Zoom:</label>
+            <input type="range" class="form-control-range" id="view-slider" name="view" min="0.5" max="2.0" step="0.1" value="1.0">
+          </div>
+          
           
         </div>
         <div class="col-md-8 col-lg-6 col-xl-4 offset-xl-1">
@@ -49,7 +56,39 @@
 </div>
 </div>
 </section>
-
+<script>
+    $(document).ready(function() {
+        // Get the slider element
+        function updateZoom() {
+          var slider = document.getElementById("zoom-slider");
+          var viewslider = document.getElementById("view-slider");
+          var csrftoken = getCookie('csrftoken');
+          $.ajax({
+              type: "POST",
+              url: "/update_zoom_factor/",
+              headers: {
+                  "X-CSRFToken": csrftoken
+              },
+              data: { zoom_factor: slider.value, view_factor: viewslider.value},
+              success: function() {
+                  console.log("Updated")
+              },
+              error: function(err) {
+                  console.error(err)
+              }
+          });
+      }
+      
+      $(document).ready(function() {
+          var slider = document.getElementById("zoom-slider");
+          var viewslider = document.getElementById("view-slider");
+          slider.addEventListener("input", updateZoom);
+          viewslider.addEventListener("input", updateZoom);
+      });
+      
+    });
+    
+</script>
 <script>
   window.addEventListener('load', 
   function() { 
