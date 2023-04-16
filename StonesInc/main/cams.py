@@ -44,6 +44,7 @@ class VideoCam(object):
 def gen(camera, imgarray):
     while True:
         image = camera.get_frame()
+        image = cv2.flip(image, 1)
         h, w = image.shape[:2]
         zoom_factor = camera.zoom_factor
         if zoom_factor > 1.0:

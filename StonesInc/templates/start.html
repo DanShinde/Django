@@ -17,10 +17,13 @@
           {% comment %} <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3"> {% endcomment %}
           <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3" id="my-image">
           <div class="form-group">
-            <label for="zoom-slider">Zoom:</label>
-            <input type="range" class="form-control-range" id="zoom-slider" name="zoom" min="0.5" max="3.0" step="0.1" value="1.0">
-            <label for="view-slider">Zoom:</label>
+            <label for="zoom-slider">Zoom:<span id="zoom-value">100%</span></label>
+            <input type="range" class="form-control-range" id="zoom-slider" name="zoom" min="1.0" max="3.0" step="0.1" value="1.0">
+
+            <label for="view-slider">Resize View:<span id="view-value">100%</span></label>
             <input type="range" class="form-control-range" id="view-slider" name="view" min="0.5" max="3.0" step="0.1" value="1.0">
+            
+
           </div>
           
           
@@ -78,7 +81,19 @@
               }
           });
       }
-      
+      const zoomSlider = document.getElementById("zoom-slider");
+      const viewSlider = document.getElementById("view-slider");
+      const zoomValue = document.getElementById("zoom-value");
+      const viewValue = document.getElementById("view-value");
+
+      zoomSlider.addEventListener("input", function() {
+        zoomValue.textContent = Math.round(zoomSlider.value * 100) + "%";
+      });
+
+      viewSlider.addEventListener("input", function() {
+        viewValue.textContent = Math.round(viewSlider.value * 100) + "%";
+      });
+
       $(document).ready(function() {
           var slider = document.getElementById("zoom-slider");
           var viewslider = document.getElementById("view-slider");

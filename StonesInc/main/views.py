@@ -122,7 +122,7 @@ def record(folder):
         fourcc = cv2.VideoWriter_fourcc(*"mp4v") #*"XVID")
 
         # Set the video frame size to match the size of the input frames
-        frame_size = (640, 480)
+        frame_size = (3840, 2160)
 
         # Create a VideoWriter object to write the frames to a video file
         out = cv2.VideoWriter(output_path, fourcc, 30.0, frame_size)
