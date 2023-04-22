@@ -206,7 +206,7 @@ def redirect_to_Gallery(request):
     stop_cam()
     return redirect('folder_list')
 
-
+@csrf_exempt
 def update_zoom_factor(request):
     if request.method == 'POST':
         zoom_factor = request.POST.get('zoom_factor')
