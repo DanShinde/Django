@@ -8,7 +8,7 @@ from django.conf import settings
 import os
 import cv2
 import json
-from .cams import *
+from .cams2 import *
 from django.http import JsonResponse
 import warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="cv2")
@@ -42,7 +42,7 @@ def at_home(request):
 
 
 
-
+@csrf_exempt
 @gzip.gzip_page
 def Home(request):
     FolderName = request.session.get('selectedFolder')
@@ -65,6 +65,8 @@ def selectfolder(request, folder):
     if folder == 'Create new folder':
         return render(request, 'select.html')
     else:
+        global cam 
+        cam.folder_name = folder
         request.session['selectedFolder'] = folder
         return HttpResponse(f'Selected folder is {folder}.')
 
@@ -75,7 +77,8 @@ def videofeed(request):
     global img_array
     try:
         global cam 
-        cam = VideoCam(request=request)
+        cam = VCam(request=request)
+        cam.folder_name = request.session['selectedFolder']
         return StreamingHttpResponse(gen(cam, img_array), content_type="multipart/x-mixed-replace;boundary=frame")
     except:
         pass
@@ -145,6 +148,7 @@ def record(folder):
     except:
         pass
 
+@csrf_exempt
 def create_folder(request):
     response_data = {}
     # Parse the request body as JSON

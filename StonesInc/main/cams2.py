@@ -1,85 +1,86 @@
-from asyncio import wait
-import datetime
-import picamera
-import os
+import io
 import time
-import cv2
-import threading
-import numpy as np
+from picamera2 import Picamera2
+from picamera2.encoders import H264Encoder
 from django.conf import settings
+import cv2
+import os
+import numpy as np
+
 
 try:
     import RPi.GPIO as GPIO
-except Exception:
+except:
     pass
 
-class VideoCam(object):
-    def __init__(self, request):
+class VCam(object):
+    def __init__(self, request) -> None:
         self.request = request
         self.imagenumber = 0
-        self.camera = picamera.PiCamera()  # Initialize the PiCamera
-        self.camera.resolution = (640, 480)  # Set the resolution
-        self.camera.framerate = 24  # Set the frame rate
+        print(0)
+        self.picam2 = Picamera2()
+        self.picam2.set_controls({"AfMode": 1 ,"AfTrigger": 0})
+        # config = self.picam2.create_still_configuration(lores={"size": (320, 240)}, display="lores")
+  # Set the resolution
+        self.picam2.preview_config = self.picam2.create_preview_configuration()
+        self.picam2.capture_config = self.picam2.create_still_configuration()
+        print(1)
+        # self.camera.framerate = 24  # Set the frame rate
         self.folder_name = None
         self.capture_frame = False  # flag to control image capture
         self.recording = False  # flag to control recording
         self.frames = []
-        self.zoom_factor = 1.0
-        self.view_factor = 1.0
-        self.frame = None
-        threading.Thread(target=self.update, args=()).start()
+        # video_config = self.picam2.create_video_configuration()
+        # self.picam2.configure(video_config)
+        self.picam2.start()
+        print(2)
+        # self.frame = self.picam2.capture_array('main')
 
     def __del__(self):
-        self.camera.close()
+        self.picam2.close()
 
     def get_frame(self):
-        image = self.frame
+        image = 0
         return image
-
+    
     def update(self):
-        stream = picamera.PiCameraCircularIO(self.camera, seconds=2)  # Create a circular stream for motion detection
-        self.camera.start_recording(stream, format='h264')  # Start recording to the stream
-        try:
-            while True:
-                self.camera.wait_recording(0.1)
-                if self.capture_frame:
-                    self.camera.capture_sequence([stream], use_video_port=True, format='jpeg')
-                    self.capture_frame = False
-                if self.recording:
-                    frame = stream.getvalue()
-                    self.frames.append(frame)
-                    self.frame = frame
-        finally:
-            self.camera.stop_recording()
+        while True:
+            self.frame = 0#self.picam2.capture_array('main')
 
+
+import io
+from PIL import Image
 
 def gen(camera, imgarray):
     while True:
-        image = camera.get_frame()
-        image = cv2.flip(image, 1)
-        h, w = image.shape[:2]
-        zoom_factor = camera.zoom_factor
-        if zoom_factor > 1.0:
-            new_h, new_w = int(h / zoom_factor), int(w / zoom_factor)
-            # Calculate the center of the image
-            center_h, center_w = int(h / 2), int(w / 2)
-            # Calculate the top left and bottom right coordinates of the crop
-            tl_h, tl_w = center_h - int(new_h / 2), center_w - int(new_w / 2)
-            br_h, br_w = tl_h + new_h, tl_w + new_w
-            # Crop the image
-            image = image[tl_h:br_h, tl_w:br_w]
-        new_h, new_w = int(h * camera.view_factor), int(w * camera.view_factor)
-        image = cv2.resize(image, (new_w, new_h))
-        _, jpeg = cv2.imencode('.jpg', image)
+        # image = camera.get_frame()
+        # frame = io.BytesIO()
+        # image = camera.capture_image("main")
+        print(1)
+        # preview_config = camera.picam2.create_preview_configuration()
+        print(2)
+        # capture_config = camera.picam2.create_still_configuration()
+        print(3)
+        # camera.picam2.configure(preview_config)
+        print(4)
+        
+        # time.sleep(2)
+        print(5)
+        image = camera.picam2.switch_mode_and_capture_image(camera.picam2.capture_config)
+        print(6)
+        image_np = np.array(image)  # Convert PIL.Image.Image to numpy array
+        _, jpeg = cv2.imencode('.jpg', image_np)
         frame = jpeg.tobytes()
+        # camera.picam2.capture_file(frame, format='jpeg')
         if camera.capture_frame:
-            # Save the image
             image_filename = f'{str(camera.folder_name)}_{camera.imagenumber:02d}.jpg'
+            print(image_filename)
             # Assuming you have a folder named "StoredData" in your media root
             image_path = os.path.join(settings.MEDIA_ROOT, 'StoredData', camera.folder_name, image_filename)
             with open(image_path, 'wb') as f:
                 f.write(frame)
             camera.capture_frame = False
+        print(type(frame))
         if camera.recording:
             imgarray.append(frame)
             camera.frames = imgarray
@@ -88,22 +89,21 @@ def gen(camera, imgarray):
 
 
 
+
 def capture_and_save_image(request, GPIO_PIN_LIST, cam):
     # Capture an image and get the image data as a BytesIO object
-    cam.folder_name = request.session.get('selectedFolder')
-    try:
+    try :
         motor = StepperMotor(GPIO_PIN_LIST)
-    except Exception:
+    except:
         print("No motor hardware")
     for i in range(1, 13):
         while cam.capture_frame:
             pass  # wait until capture_frame is False
         cam.imagenumber= i
         cam.capture_frame = True
-        time.sleep(0.5)
         try:
             motor.rotate(degrees=30)
-        except Exception:
+        except:
             print("No motor hardware")
 
 
@@ -117,9 +117,7 @@ def create_options(folder_path):
     # Filter the list to only include directories
     options = [item for item in items if os.path.isdir(os.path.join(subfolder_path, item))]
     # Add the "create new folder" option to the list
-    
     options.insert(0,'Create new folder')
-    options = reversed(options)
     # Return the list of directories
     return options
 
@@ -169,13 +167,21 @@ class StepperMotor(object):
         :param direction: (Boolean) Clockwise = True | Inverted = False
         :return: None
         """
-        direction = degrees <= 0
-        self.phase = np.roll(self.phase, 1) if direction else np.roll(self.phase, -1)
+        if degrees >0:
+            direction = False
+        else:
+            direction = True
+        
+        if direction:
+            self.phase = np.roll(self.phase, 1)
+        else:
+            self.phase = np.roll(self.phase, -1)
+
         for pin_idx in range(len(self.gpio_list)):
             GPIO.output(self.gpio_list[pin_idx], int(self.phase.astype(int)[pin_idx]))
 
     def rotate(self,  degrees=0, delay=0.002):
-
+        
         """
         Perform rotation with direction and angle info.
 
@@ -185,10 +191,7 @@ class StepperMotor(object):
         """
         init_gpio(self.gpio_list)
         step_number = int(self.REVOLUTION_STEP_NUMBER * abs(degrees)/ 360)
-        for _ in range(step_number):
+        for i in range(0, step_number):
             self.rotate_segment(degrees)
             time.sleep(delay)
         GPIO.cleanup()
-
-
-#rewrite gen function so that there will also be option for recording images to array and then convert it to videos

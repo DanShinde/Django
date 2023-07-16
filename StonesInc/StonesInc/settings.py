@@ -33,7 +33,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     'raspberrypi',
     'localhost',
-                 ]
+    "*" ]
 
 
 # Application definition
