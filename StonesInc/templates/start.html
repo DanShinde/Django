@@ -15,7 +15,9 @@
         <div class="col-md-9 col-lg-6 col-xl-5">
           
           {% comment %} <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3"> {% endcomment %}
-          <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3" id="my-image">
+          {% comment %} <img src="{% url 'video_feed' %}" alt="Your Image" class="img-fluid mb-3" id="my-image"> {% endcomment %}
+          <img id="stream" src="{% url 'stream_video' %}" width="640" height="480" />
+
           <div class="form-group">
             <label for="zoom-slider">Zoom:<span id="zoom-value">100%</span></label>
             <input type="range" class="form-control-range" id="zoom-slider" name="zoom" min="1.0" max="3.0" step="0.1" value="1.0">

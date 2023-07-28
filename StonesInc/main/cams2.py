@@ -22,8 +22,11 @@ class VCam(object):
         self.picam2.set_controls({"AfMode": 1 ,"AfTrigger": 0})
         # config = self.picam2.create_still_configuration(lores={"size": (320, 240)}, display="lores")
   # Set the resolution
-        self.picam2.preview_config = self.picam2.create_preview_configuration()
-        self.picam2.capture_config = self.picam2.create_still_configuration()
+        self.picam2.preview_config = self.picam2.create_preview_configuration(lores={"size": (640, 480)}, display="lores")
+        self.picam2.capture_config = self.picam2.create_still_configuration(lores={"size": (640, 480)}, display="lores")
+        self.picam2.align_configuration(self.picam2.capture_config)
+        self.picam2.configure(picam2.create_video_configuration(main={"size": (640, 480)}))
+
         print(1)
         # self.camera.framerate = 24  # Set the frame rate
         self.folder_name = None
@@ -53,19 +56,7 @@ from PIL import Image
 
 def gen(camera, imgarray):
     while True:
-        # image = camera.get_frame()
-        # frame = io.BytesIO()
-        # image = camera.capture_image("main")
-        print(1)
-        # preview_config = camera.picam2.create_preview_configuration()
-        print(2)
-        # capture_config = camera.picam2.create_still_configuration()
-        print(3)
-        # camera.picam2.configure(preview_config)
-        print(4)
-        
-        # time.sleep(2)
-        print(5)
+        camera.picam2.set_controls({"AfMode": 1 ,"AfTrigger": 0})
         image = camera.picam2.switch_mode_and_capture_image(camera.picam2.capture_config)
         print(6)
         image_np = np.array(image)  # Convert PIL.Image.Image to numpy array

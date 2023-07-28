@@ -71,17 +71,56 @@ def selectfolder(request, folder):
         return HttpResponse(f'Selected folder is {folder}.')
 
 
+from django.http import StreamingHttpResponse
+from picamera2.encoders import JpegEncoder
+from picamera2.outputs import FileOutput
+from threading import Condition
+import io
 
 
-def videofeed(request):
-    global img_array
-    try:
-        global cam 
-        cam = VCam(request=request)
-        cam.folder_name = request.session['selectedFolder']
-        return StreamingHttpResponse(gen(cam, img_array), content_type="multipart/x-mixed-replace;boundary=frame")
-    except:
-        pass
+import io
+from django.http import StreamingHttpResponse
+from django.views.decorators.http import condition
+from threading import Condition
+from picamera2 import Picamera2
+from picamera2.encoders import JpegEncoder
+from picamera2.outputs import FileOutput
+
+
+class StreamingOutput(io.BufferedIOBase):
+    def __init__(self):
+        self.frame = None
+        self.condition = Condition()
+
+    def write(self, buf):
+        with self.condition:
+            self.frame = buf
+            self.condition.notify_all()
+
+
+output = StreamingOutput()
+picam2 = Picamera2()
+picam2.set_controls({"AfMode": 1 ,"AfTrigger": 0, "LensPosition": 425})
+picam2.configure(picam2.create_video_configuration(main={"size": (1280, 720)}))
+picam2.start_recording(JpegEncoder(), FileOutput(output))
+
+
+@condition(etag_func=None)
+def stream_video(request):
+    def stream():
+        try:
+            while True:
+                with output.condition:
+                    output.condition.wait()
+                    frame = output.frame
+                yield (b'--FRAME\r\n'
+                       b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+        except GeneratorExit:
+            picam2.stop_recording()
+
+    return StreamingHttpResponse(stream(), content_type='multipart/x-mixed-replace; boundary=FRAME')
+
+
 
 
 def start_Photos(request):
