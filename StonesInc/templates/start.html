@@ -19,12 +19,22 @@
           <img id="stream" src="{% url 'stream_video' %}" width="640" height="480" />
 
           <div class="form-group">
-            <label for="zoom-slider">Zoom:<span id="zoom-value">100%</span></label>
-            <input type="range" class="form-control-range" id="zoom-slider" name="zoom" min="1.0" max="3.0" step="0.1" value="1.0">
-
-            <label for="view-slider">Resize View:<span id="view-value">100%</span></label>
-            <input type="range" class="form-control-range" id="view-slider" name="view" min="0.5" max="3.0" step="0.1" value="1.0">
-            
+            <p>AFMode:</p>
+            <div id="afModeButtons">
+                <button class="afModeButton" data-afmode="0">AF Mode Manual</button>
+                <button class="afModeButton" data-afmode="1">AF Mode Auto</button>
+                <button class="afModeButton" data-afmode="2">AF Mode Continuous</button>
+            </div>
+        
+            <p>AFTrigger:</p>
+            <div id="afTriggerButtons">
+                <button class="afTriggerButton" data-aftrigger="0">AF Trigger 0</button>
+                <button class="afTriggerButton" data-aftrigger="1">AF Trigger 1</button>
+            </div>
+        
+            <p>Focus:</p>
+            <input type="range" min="0" max="514" value="425" id="focusSlider">
+         
 
           </div>
           
@@ -253,6 +263,53 @@ fetch('/record/')
 
 
 
+</script>
+
+<script>
+  // Function to send the selected AFMode, AFTrigger, and Focus values to the server
+  function updateCameraControls() {
+      const selectedAFMode = $("#afModeButtons button.active").data("afmode");
+      const selectedAFTrigger = $("#afTriggerButtons button.active").data("aftrigger");
+      const selectedFocus = $("#focusSlider").val();
+
+      $.ajax({
+          type: "POST",
+          url: "/update_camera_controls/",
+          data: {
+              afMode: selectedAFMode,
+              afTrigger: selectedAFTrigger,
+              focus: selectedFocus
+          },
+          success: function (data) {
+            if (data.success) {
+                console.log("Camera controls updated successfully");
+                console.log("Received parameters - AFMode:", data.afMode, "AFTrigger:", data.afTrigger, "Focus:", data.focus);
+            } else {
+                console.error("Failed to update camera controls");
+            }
+        },
+        error: function () {
+            console.error("Failed to update camera controls");
+        }
+      });
+  }
+
+  // Attach click event handlers to AFMode buttons
+  $("#afModeButtons button").click(function () {
+      $(this).addClass("active").siblings().removeClass("active");
+      updateCameraControls();
+  });
+
+  // Attach click event handlers to AFTrigger buttons
+  $("#afTriggerButtons button").click(function () {
+      $(this).addClass("active").siblings().removeClass("active");
+      updateCameraControls();
+  });
+
+  // Attach change event handler to Focus slider
+  $("#focusSlider").on("input", function () {
+      updateCameraControls();
+  });
 </script>
 {% endblock %}
 

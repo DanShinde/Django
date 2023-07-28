@@ -104,7 +104,24 @@ picam2.set_controls({"AfMode": 1 ,"AfTrigger": 0, "LensPosition": 425})
 picam2.configure(picam2.create_video_configuration(main={"size": (1280, 720)}))
 picam2.start_recording(JpegEncoder(), FileOutput(output))
 
+from django.http import JsonResponse
 
+@csrf_exempt
+def update_camera_controls(request):
+    if request.method == 'POST' and 'afMode' in request.POST and 'afTrigger' in request.POST and 'focus' in request.POST:
+        af_mode = int(request.POST['afMode'])
+        af_trigger = int(request.POST['afTrigger'])
+        focus = int(request.POST['focus'])
+        print(f'AFMode: {af_mode}, AFTrig:{af_trigger}, LensPos:{focus}')
+        # Update picam2 settings here based on the received values (af_mode, af_trigger, and focus)
+        picam2.set_controls({"AfMode": af_mode, "AfTrigger": af_trigger, "LensPosition": focus})
+
+        # Prepare the response data to send back to JavaScript
+        response_data = {'success': True, 'afMode': af_mode, 'afTrigger': af_trigger, 'focus': focus}
+        return JsonResponse(response_data)
+    else:
+        return JsonResponse({'success': False})
+    
 @condition(etag_func=None)
 def stream_video(request):
     def stream():
